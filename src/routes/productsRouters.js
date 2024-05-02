@@ -4,6 +4,7 @@ import config from "../config.js";
 
 const router = Router()
 const manager = new ProductManager(`${config.DIRNAME}/mocks/products.json`)
+
 router.get("/", async (req, res) => {
     const limit = req.query.limit
     const products =  await manager.getProduct(limit)
@@ -17,7 +18,11 @@ router.get("/:pid", async (req, res) => {
 })
 
 router.post("/", async (req, res) => {
-    await manager.addProduct(req.body)
+    const socketServer = req.app.get('socketServer')
+    if(await manager.addProduct(req.body)){
+        const data = req.body
+        socketServer.emit('newProduct', data)
+    }
 })
 
 router.put("/:pid", async (req, res) => {
@@ -26,8 +31,11 @@ router.put("/:pid", async (req, res) => {
 })
 
 router.delete("/:pid", async (req, res) => {
+    const socketServer = req.app.get('socketServer')
     const id = req.params.pid
-    await manager.deleteProduct(id)
+    if(await manager.deleteProduct(id)){
+        socketServer.emit('deleteProduct', id)
+    }
 })
 
 export default router

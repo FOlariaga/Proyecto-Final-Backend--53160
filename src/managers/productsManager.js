@@ -28,6 +28,7 @@ class ProductManager {
         if (title && description && price && status && code && stock && category) {
             if (this.products.some((p) => p.code === code)) {
                 console.log("el codigo ya se encuentra en otro producto")
+                return false
             } else {
                 const product = {
                     id: fs.existsSync(this.path)? getId() : 1 ,
@@ -42,6 +43,7 @@ class ProductManager {
                 }
                 this.products.push(product)
                 await fs.promises.writeFile(this.path, JSON.stringify(this.products), "utf-8")
+                return true
             }
         } else {
             const object = { title, description, price, code, stock, status, category }
@@ -56,6 +58,7 @@ class ProductManager {
                 }
             }
             console.log("falta " + objectIncomplete.join() + " para poder agregar el producto")
+            return false
         }
     }
 
@@ -110,8 +113,11 @@ class ProductManager {
                 this.products.splice(i, 1)
                 console.log("se elimino el producto correctamente");
                 await fs.promises.writeFile(this.path, JSON.stringify(this.products), "utf-8")
+                return true
             }
         }
+        console.log(`no se encontro ningun producto con el id ${idProduct}`)
+        return false
     }
 }
 
